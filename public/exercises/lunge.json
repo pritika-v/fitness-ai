@@ -1,0 +1,24 @@
+{
+  "id": "lunge",
+  "name": "Lunge",
+  "targetReps": 10,
+  "sets": 1,
+  "repPhase": {
+    "jointGroup": "knee",
+    "side": "front",
+    "upAngle": 160,
+    "downAngle": 100,
+    "minDepthAngle": 110
+  },
+  "formChecks": ["backStraight", "kneeValgus", "depth", "headNeck"],
+  "thresholds": {
+    "backAngleMin": 150,
+    "kneeValgusInwardMax": 0.07,
+    "depthJoint": "knee",
+    "depthMin": 110,
+    "neckAngleMin": 130,
+    "frontKneeOverToeMax": 0.08
+  },
+  "cameraHint": "Place camera to your side so both legs are visible.",
+  "startPositionHint": "Stand upright with feet together."
+}

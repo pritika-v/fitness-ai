@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fitness AI Trainer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0e0e0e; color: #f0f0f0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      display: flex; flex-direction: column; align-items: center;
+      min-height: 100vh; padding: 14px 16px 24px; gap: 12px;
+    }
+    h1 { font-size: 1.35rem; font-weight: 700; color: #f5a623;
+         align-self: flex-start; width: 100%; max-width: 960px; }
+
+    .container { display: flex; flex-wrap: wrap; gap: 14px;
+                 width: 100%; max-width: 960px; justify-content: center; }
+
+    .video-wrap { flex: 1 1 320px; max-width: 560px; border-radius: 12px;
+                  overflow: hidden; background: #000; aspect-ratio: 4/3; position: relative; }
+    video  { width: 100%; height: 100%; object-fit: cover; display: block; transform: scaleX(-1); }
+    #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+               pointer-events: none; transform: scaleX(-1); }
+
+    /* Rest overlay */
+    #rest-overlay { display: none; position: absolute; inset: 0;
+                    background: rgba(0,0,0,0.88); flex-direction: column;
+                    align-items: center; justify-content: center; gap: 8px; border-radius: 12px; }
+    #rest-overlay .label  { font-size: 0.85rem; color: #aaa; }
+    #rest-overlay .timer  { font-size: 4rem; font-weight: 800; color: #f5a623; line-height: 1; }
+    #rest-overlay .next   { font-size: 0.95rem; color: #ccc; }
+
+    .stats { flex: 1 1 220px; display: flex; flex-direction: column; gap: 10px; min-width: 210px; }
+
+    #status { padding: 10px 14px; border-radius: 9px; font-size: 0.875rem; font-weight: 500;
+              line-height: 1.45; background: #1e1e1e; color: #bbb; min-height: 46px; }
+    #status.warn  { background: #2a1f00; color: #f5c842; }
+    #status.ready { background: #0d2314; color: #4cde7a; }
+    #status.error { background: #2a0d0d; color: #ff7070; }
+    #status.info  { background: #0d1e2a; color: #60b8f5; }
+
+    #exercise-name { font-size: 1.1rem; font-weight: 700; color: #f5a623; }
+    #progress      { font-size: 0.78rem; color: #666; }
+
+    .rep-row { display: flex; gap: 10px; }
+    .rep-card { flex: 1; background: #1a1a1a; border-radius: 10px; padding: 11px 10px; text-align: center; }
+    .rep-card .label { font-size: 0.68rem; text-transform: uppercase;
+                       letter-spacing: 0.09em; color: #666; margin-bottom: 3px; }
+    .rep-card .value { font-size: 2.2rem; font-weight: 800; line-height: 1; }
+    .rep-card.good .value { color: #4cde7a; }
+    .rep-card.bad  .value { color: #ff5c5c; }
+
+    .detail-row { background: #1a1a1a; border-radius: 8px; padding: 9px 13px;
+                  display: flex; justify-content: space-between; align-items: center;
+                  font-size: 0.86rem; }
+    .detail-row .key { color: #666; }
+    .detail-row .val { font-weight: 600; color: #eee; }
+    .val.green  { color: #4cde7a; }
+    .val.yellow { color: #f5c842; }
+    .val.red    { color: #ff5c5c; }
+
+    #form-feedback { background: #1a1a1a; border-radius: 9px; padding: 11px 14px;
+                     font-size: 0.83rem; line-height: 1.65; min-height: 52px; color: #999; }
+    #form-feedback .good { color: #4cde7a; font-weight: 700; }
+    #form-feedback .warn { color: #f5c842; font-weight: 700; }
+    #form-feedback .bad  { color: #ff5c5c; font-weight: 700; }
+    #form-feedback .tip  { color: #aaa; }
+
+    .btn-row { display: flex; gap: 10px; }
+    button { flex: 1; padding: 12px 0; border: none; border-radius: 8px;
+             font-size: 0.97rem; font-weight: 700; cursor: pointer; }
+    button:disabled { opacity: 0.4; cursor: default; }
+    #start-btn { background: #f5a623; color: #111; }
+    #reset-btn { background: #252525; color: #bbb; }
+  </style>
+
+  <!-- MediaPipe and TF.js loaded as globals (no bundler needed) -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+</head>
+<body>
+
+<h1>Fitness AI Trainer</h1>
+
+<div class="container">
+  <div class="video-wrap">
+    <video id="video" playsinline muted></video>
+    <canvas id="overlay"></canvas>
+    <div id="rest-overlay">
+      <div class="label">Rest</div>
+      <div class="timer" id="rest-countdown">15</div>
+      <div class="next"  id="next-exercise-name"></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div id="status">Click <strong>Start</strong> to begin.</div>
+
+    <div>
+      <div id="exercise-name">—</div>
+      <div id="progress"></div>
+    </div>
+
+    <div class="rep-row">
+      <div class="rep-card good">
+        <div class="label">Good Reps</div>
+        <div class="value" id="good-reps">0</div>
+      </div>
+      <div class="rep-card bad">
+        <div class="label">Bad Reps</div>
+        <div class="value" id="bad-reps">0</div>
+      </div>
+    </div>
+
+    <div class="detail-row">
+      <span class="key">Elbow angle</span>
+      <span class="val" id="elbow-angle">--</span>
+    </div>
+    <div class="detail-row">
+      <span class="key">Phase</span>
+      <span class="val" id="phase">--</span>
+    </div>
+    <div class="detail-row">
+      <span class="key">Body visible</span>
+      <span class="val" id="body-visible">--</span>
+    </div>
+
+    <div id="form-feedback">Form feedback will appear here after each rep.</div>
+
+    <div class="btn-row">
+      <button id="start-btn">Start</button>
+      <button id="reset-btn">Reset</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>

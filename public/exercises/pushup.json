@@ -1,0 +1,24 @@
+{
+  "id": "pushup",
+  "name": "Push-up",
+  "targetReps": 10,
+  "sets": 1,
+  "repPhase": {
+    "jointGroup": "elbow",
+    "side": "auto",
+    "upAngle": 155,
+    "downAngle": 92,
+    "minDepthAngle": 115
+  },
+  "formChecks": ["backStraight", "elbowFlare", "hipSag", "depth", "headNeck"],
+  "thresholds": {
+    "backAngleMin": 135,
+    "elbowFlareMax": 0.18,
+    "hipSagYMargin": 0.09,
+    "hipRaiseYMargin": 0.11,
+    "lumbarSagMargin": 0.12,
+    "neckAngleMin": 125
+  },
+  "cameraHint": "Place camera to your side at floor level so your full body profile is visible.",
+  "startPositionHint": "Get into a plank position with arms extended."
+}

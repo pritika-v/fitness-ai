@@ -1,0 +1,21 @@
+{
+  "id": "jumpingJack",
+  "name": "Jumping Jack",
+  "targetReps": 10,
+  "sets": 1,
+  "repPhase": {
+    "jointGroup": "shoulder",
+    "side": "auto",
+    "upAngle": 150,
+    "downAngle": 40,
+    "minDepthAngle": null
+  },
+  "formChecks": ["backStraight", "depth"],
+  "thresholds": {
+    "backAngleMin": 155,
+    "shoulderRaiseMin": 150,
+    "shoulderLowerMax": 40
+  },
+  "cameraHint": "Place camera in front of you so your full body is visible.",
+  "startPositionHint": "Stand upright with arms at your sides."
+}

@@ -1,0 +1,19 @@
+{
+  "id": "plank",
+  "name": "Plank",
+  "targetReps": 1,
+  "sets": 1,
+  "isHold": true,
+  "holdDurationSeconds": 30,
+  "repPhase": null,
+  "formChecks": ["backStraight", "hipSag", "headNeck"],
+  "thresholds": {
+    "backAngleMin": 155,
+    "hipSagYMargin": 0.07,
+    "hipRaiseYMargin": 0.08,
+    "lumbarSagMargin": 0.08,
+    "neckAngleMin": 130
+  },
+  "cameraHint": "Place camera to your side at floor level.",
+  "startPositionHint": "Get into a forearm plank position."
+}

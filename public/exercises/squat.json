@@ -1,0 +1,24 @@
+{
+  "id": "squat",
+  "name": "Squat",
+  "targetReps": 10,
+  "sets": 1,
+  "repPhase": {
+    "jointGroup": "knee",
+    "side": "auto",
+    "upAngle": 160,
+    "downAngle": 100,
+    "minDepthAngle": 110
+  },
+  "formChecks": ["backStraight", "kneeValgus", "depth", "hipSag"],
+  "thresholds": {
+    "backAngleMin": 140,
+    "kneeValgusInwardMax": 0.06,
+    "hipSagYMargin": 0.10,
+    "lumbarSagMargin": 0.10,
+    "depthJoint": "knee",
+    "depthMin": 110
+  },
+  "cameraHint": "Place camera to your side so your full body is visible from head to feet.",
+  "startPositionHint": "Stand upright with feet shoulder-width apart."
+}
