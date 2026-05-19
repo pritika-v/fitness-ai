@@ -74,6 +74,75 @@
     button:disabled { opacity: 0.4; cursor: default; }
     #start-btn { background: #f5a623; color: #111; }
     #reset-btn { background: #252525; color: #bbb; }
+    /* ── Hold timer ring ── */
+    #hold-timer-container {
+      display: none;               /* hidden by default; shown only for hold exercises */
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      border-radius: 12px;
+      z-index: 10;
+    }
+
+    .hold-ring-svg {
+      transform: rotate(-90deg);   /* start progress from top */
+    }
+
+    .hold-ring-track {
+      fill: none;
+      stroke: #222;
+      stroke-width: 10;
+    }
+
+    .hold-ring-progress {
+      fill: none;
+      stroke: #f5a623;
+      stroke-width: 10;
+      stroke-linecap: round;
+      stroke-dasharray: 326.7;
+      stroke-dashoffset: 326.7;    /* starts empty */
+      transition: stroke-dashoffset 0.25s linear, stroke 0.25s;
+    }
+
+    .hold-ring-number {
+      position: absolute;
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: #f0f0f0;
+      /* centred over the SVG — achieved with the wrapper below */
+    }
+
+    .hold-ring-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 130px;
+      height: 130px;
+    }
+
+    .hold-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #aaa;
+      text-align: center;
+      max-width: 220px;
+      line-height: 1.4;
+      transition: color 0.2s;
+    }
+
+    /* Red flash when hold breaks */
+    @keyframes holdFlash {
+      0%   { background: rgba(255, 60, 60, 0.35); }
+      100% { background: rgba(0, 0, 0, 0.72); }
+    }
+    .hold-flash {
+      animation: holdFlash 0.5s ease-out;
+    }
   </style>
 
   <!-- MediaPipe and TF.js loaded as globals (no bundler needed) -->
@@ -88,6 +157,17 @@
   <div class="video-wrap">
     <video id="video" playsinline muted></video>
     <canvas id="overlay"></canvas>
+    <!-- Hold timer overlay — visible only during hold exercises like plank -->
+    <div id="hold-timer-container">
+      <div class="hold-ring-wrap">
+        <svg class="hold-ring-svg" width="130" height="130" viewBox="0 0 130 130">
+          <circle class="hold-ring-track"    cx="65" cy="65" r="52"/>
+          <circle class="hold-ring-progress" cx="65" cy="65" r="52"/>
+        </svg>
+        <span class="hold-ring-number">—</span>
+      </div>
+      <div class="hold-label">Get into plank position</div>
+    </div>
     <div id="rest-overlay">
       <div class="label">Rest</div>
       <div class="timer" id="rest-countdown">15</div>

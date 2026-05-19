@@ -4,7 +4,7 @@
   "targetReps": 1,
   "sets": 1,
   "isHold": true,
-  "holdDurationSeconds": 30,
+  "holdDurationSeconds": 20,
   "repPhase": null,
   "formChecks": ["backStraight", "hipSag", "headNeck"],
   "thresholds": {
@@ -14,6 +14,6 @@
     "lumbarSagMargin": 0.08,
     "neckAngleMin": 130
   },
-  "cameraHint": "Place camera to your side at floor level.",
-  "startPositionHint": "Get into a forearm plank position."
+  "cameraHint": "Place camera to your side at floor level so your full body profile from head to feet is visible.",
+  "startPositionHint": "Get into a forearm or straight-arm plank position and hold still."
 }

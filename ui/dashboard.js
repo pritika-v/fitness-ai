@@ -1,6 +1,4 @@
-// Updates all the live stat elements in the DOM.
-// Receives data — does zero computation.
-
+// ui/dashboard.js
 export class Dashboard {
   constructor() {
     this._els = {
@@ -13,39 +11,68 @@ export class Dashboard {
       bodyVis:      document.getElementById('body-visible'),
       elbowAngle:   document.getElementById('elbow-angle'),
     };
+    this._isHoldMode = false;
   }
 
   setExercise(config, index, total) {
+    this._isHoldMode = !!config.isHold;
     this._set('exerciseName', config.name);
     this._set('progress', `Exercise ${index + 1} of ${total}`);
     this._set('goodReps', '0');
     this._set('badReps',  '0');
     this._set('phase',    '--');
+
+    // Hide rep-specific rows during hold exercises
+    const repRow    = document.querySelector('.rep-row');
+    const elbowRow  = document.getElementById('elbow-angle')?.closest('.detail-row');
+    const phaseRow  = document.getElementById('phase')?.closest('.detail-row');
+
+    if (this._isHoldMode) {
+      if (repRow)   repRow.style.display   = 'none';
+      if (elbowRow) elbowRow.style.display = 'none';
+      if (phaseRow) phaseRow.style.display = 'none';
+    } else {
+      if (repRow)   repRow.style.display   = '';
+      if (elbowRow) elbowRow.style.display = '';
+      if (phaseRow) phaseRow.style.display = '';
+    }
+
     this.setStatus(config.startPositionHint ?? 'Get into position.', 'warn');
   }
 
   onFrame({ goodReps, badReps, phase, isReady, inPos, setup, measurements }) {
-    this._set('goodReps', goodReps);
-    this._set('badReps',  badReps);
+    if (!this._isHoldMode) {
+      this._set('goodReps', goodReps);
+      this._set('badReps',  badReps);
 
-    if (measurements?.elbowAngle != null)
-      this._set('elbowAngle', Math.round(measurements.elbowAngle) + '°');
+      if (measurements?.elbowAngle != null)
+        this._set('elbowAngle', Math.round(measurements.elbowAngle) + '°');
 
-    if (!inPos) {
-      this._set('phase', '—');
-      this.setStatus('📍 Get into position', 'warn');
-    } else if (!isReady) {
-      this._set('phase', 'HOLD…');
-      this.setStatus('⏳ Hold your starting position…', 'warn');
+      if (!inPos) {
+        this._set('phase', '—');
+        this.setStatus('📍 Get into position', 'warn');
+      } else if (!isReady) {
+        this._set('phase', 'HOLD…');
+        this.setStatus('⏳ Hold your starting position…', 'warn');
+      } else {
+        this._set('phase', phase ?? '--');
+        this.setStatus('🟢 Go! Counting your reps.', 'ready');
+      }
     } else {
-      this._set('phase', phase ?? '--');
-      this.setStatus('🟢 Go! Counting your reps.', 'ready');
+      // Hold mode — status is driven by holdTimerUI, not here
+      if (!inPos) {
+        this.setStatus('📍 Get into plank position', 'warn');
+      } else if (!isReady) {
+        this.setStatus('⏳ Hold still for a moment…', 'warn');
+      }
+      // Once ready, HoldTimerUI takes over the feedback
     }
 
     if (setup && !setup.ok) {
       this._set('bodyVis', '✗ Adjust');
       this._setClass('bodyVis', 'val red');
-      this.setStatus(`${setup.message} — ${setup.detail}`, 'warn');
+      if (!this._isHoldMode)
+        this.setStatus(`${setup.message} — ${setup.detail}`, 'warn');
     } else {
       this._set('bodyVis', '✓ Good');
       this._setClass('bodyVis', 'val green');
@@ -63,6 +90,7 @@ export class Dashboard {
     const e = this._els[key];
     if (e) e.textContent = String(val);
   }
+
   _setClass(key, cls) {
     const e = this._els[key];
     if (e) e.className = cls;
